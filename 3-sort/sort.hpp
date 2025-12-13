@@ -6,8 +6,6 @@ namespace val
 {
     size_t INSERTION_THRESHOLD = 20;
 
-    //TODO: rewrite using pointer math instead of [] op?
-    //(even though techically [] is pointer math)
 
     template <typename T, typename Compare>
     void InsertionSort(T* first, T* last, Compare comp)
@@ -213,8 +211,7 @@ namespace val
     void sort(T* first, T* last, Compare comp)
     {
         //Utilize quick sort for larger splits, and use insertion sort for small
-        // HybridSortNoTailRecursion(first, last, comp);
-        QuickSort(first, last, comp);
+        HybridSortNoTailRecursion(first, last, comp);
     }
 
 }
