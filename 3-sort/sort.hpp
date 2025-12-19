@@ -4,7 +4,7 @@
 
 namespace val
 {
-    size_t INSERTION_THRESHOLD = 20;
+    inline constexpr size_t INSERTION_THRESHOLD = 200;
 
 
     template <typename T, typename Compare>
@@ -166,6 +166,29 @@ namespace val
     }
 
     template <typename T, typename Compare>
+    void QuickSortHoareNoTailRecursion(T* first, T* last, Compare comp)
+    {
+        while (last - first > 1)
+        {
+            T* q = HoarePartitionWithMedian(first, last, comp);
+
+            //left includes q, right doesnt
+            size_t left = (q+1)-first;
+            size_t right = last - (q+1);
+            if (left < right)
+            {
+                QuickSortHoareNoTailRecursion(first, q + 1, comp);
+                first=q+1;
+            }
+            else
+            {
+                QuickSortHoareNoTailRecursion(q + 1, last, comp);
+                last = q + 1;
+            }
+        }
+    }
+
+    template <typename T, typename Compare>
     void HybridSort(T* first, T* last, Compare comp)
     {
         size_t len = last - first;
@@ -187,6 +210,7 @@ namespace val
         while (last - first > INSERTION_THRESHOLD)
         {
             T* q = HoarePartitionWithMedian(first, last, comp);
+            //T* q = Partition(first, last, comp);
 
             //left includes q, right doesnt
             size_t left = (q+1)-first;
@@ -210,8 +234,9 @@ namespace val
     template <typename T, typename Compare>
     void sort(T* first, T* last, Compare comp)
     {
-        //Utilize quick sort for larger splits, and use insertion sort for small
         HybridSortNoTailRecursion(first, last, comp);
+        //QuickSort(first, last, comp);
+        //QuickSortHoareNoTailRecursion(first,last,comp);
     }
 
 }
