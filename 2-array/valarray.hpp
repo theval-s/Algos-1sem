@@ -43,18 +43,13 @@ public: //functions required by task
     Array& operator=(const Array& other)
     {
         if (this == &other) return *this;
-        annihilate();
 
-        allocate(other.m_size>0 ? other.m_capacity : DEFAULT_CAPACITY);
-        if (other.m_size > 0)
-        {
-            for (int i = 0; i < other.m_size; ++i)
-            {
-                std::construct_at(m_data+i, other.m_data[i]);
-            }
-            m_size = other.m_size;
-        }
+        Array temp(other);
+        std::swap(m_data, temp.m_data);
+        std::swap(m_size, temp.m_size);
+        std::swap(m_capacity, temp.m_capacity);
         return *this;
+        //temp destroyed
     }
 
     Array& operator=(Array&& other) noexcept
