@@ -620,6 +620,51 @@ TEST(ArrayRangeForTest, NestedRangeFor) {
     EXPECT_EQ(sum, 10);  // 1 + 2 + 3 + 4
 }
 
+class NonMovable
+{
+public:
+    int value;
+    int copyTimes = 0;
+    NonMovable() { value = 1; }
+    NonMovable(int val) { value = val; }
+    NonMovable(const NonMovable& other) : value(other.value)
+    {
+        copyTimes = other.copyTimes+1;
+    }
+    NonMovable& operator=(const NonMovable& other)
+    {
+        copyTimes=other.copyTimes+1;
+        value = other.value;
+        return *this;
+    }
+
+    NonMovable(NonMovable&& other) = delete;
+    NonMovable& operator=(NonMovable&& other) = delete;
+
+    ~NonMovable() = default;
+
+    bool operator==(const NonMovable& other) const
+    {
+        return value == other.value;
+    }
+};
+
+TEST(ArrayNonMovableTest, NonMovableAssignmentTest)
+{
+    Array<NonMovable> arr(1);
+    arr.insert(NonMovable(1));
+    arr.insert(NonMovable(2));
+
+    Array<NonMovable> arr2(1);
+    arr2.insert(NonMovable(3));
+    arr2.insert(NonMovable(4));
+
+    arr=arr2;
+    EXPECT_TRUE(arr[0]==NonMovable(3));
+    EXPECT_TRUE(arr[0].copyTimes==3);
+    //insert, reallocate, reassign
+}
+
 #pragma endregion
 int main(int argc, char **argv)
 {

@@ -183,12 +183,13 @@ private:
     {
         int newCapacity = static_cast<int>(std::ceil(m_capacity*GROWTH_FACTOR));
         newCapacity = (newCapacity == 0) ? DEFAULT_CAPACITY : newCapacity;
+        assert(newCapacity > m_size);
         allocate(newCapacity);
     }
 
     void allocate(int capacity)
     {
-        assert(capacity > m_size);
+        assert(capacity >= m_size);
         if (capacity == 0) capacity = DEFAULT_CAPACITY;
 
         void* newPtr = malloc(capacity*sizeof(T));
@@ -200,7 +201,7 @@ private:
         {
             for (int i = 0; i < m_size; ++i)
             {
-                std::construct_at(newData+i, std::move(m_data[i]));
+                std::construct_at(newData+i, std::move_if_noexcept(m_data[i]));
                 std::destroy_at(&m_data[i]);
             }
             free(m_data);
