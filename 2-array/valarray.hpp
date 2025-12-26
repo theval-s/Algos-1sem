@@ -29,7 +29,11 @@ public: //functions required by task
         , m_capacity(other.m_capacity)
     {
         allocate(m_capacity);
-        std::uninitialized_copy(other.m_data, other.m_data + other.m_size, m_data);
+        //std::uninitialized_copy(other.m_data, other.m_data + other.m_size, m_data);
+        for (int i = 0; i < other.m_size; ++i)
+        {
+            ::new (m_data + i) T(other.m_data[i]);
+        }
     }
 
     Array(Array&& other) noexcept
@@ -68,7 +72,8 @@ public: //functions required by task
     {
         if (m_size == m_capacity) grow();
 
-        std::construct_at(m_data+m_size, value);
+        //std::construct_at(m_data+m_size, value);
+        ::new (m_data + m_size) T(value);
         m_size++;
 
         return m_size-1;
@@ -86,7 +91,8 @@ public: //functions required by task
     {
         assert(index >= 0 && index < m_size);
         shiftElementsLeft(index+1);
-        std::destroy_at(&m_data[m_size-1]);
+        // std::destroy_at(&m_data[m_size-1]);
+        m_data[m_size-1].~T();
         m_size-=1;
     }
     int size() const
@@ -170,7 +176,8 @@ private:
         {
             for (int i = 0; i < m_size; ++i)
             {
-                std::destroy_at(m_data + i);
+                //std::destroy_at(m_data + i);
+                m_data[i].~T();
             }
             free(m_data);
         }
@@ -201,8 +208,10 @@ private:
         {
             for (int i = 0; i < m_size; ++i)
             {
-                std::construct_at(newData+i, std::move_if_noexcept(m_data[i]));
-                std::destroy_at(&m_data[i]);
+                //std::construct_at(newData+i, std::move_if_noexcept(m_data[i]));
+                //std::destroy_at(&m_data[i]);
+                ::new (newData + i) T(std::move_if_noexcept(m_data[i]));
+                m_data[i].~T();
             }
             free(m_data);
         }
@@ -232,7 +241,8 @@ private:
     {
         assert(startIndex >= 0 && startIndex < m_size && m_size < m_capacity);
 
-        std::construct_at(m_data+m_size, std::move(m_data[m_size-1]));
+        //std::construct_at(m_data+m_size, std::move(m_data[m_size-1]));
+        ::new (m_data+m_size) T(std::move_if_noexcept(m_data[m_size-1]));
         for (int i = m_size-1; i > startIndex; --i)
         {
             m_data[i] = std::move(m_data[i-1]);
